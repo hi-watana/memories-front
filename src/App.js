@@ -1,10 +1,90 @@
 import React from 'react';
+import {
+  Button,
+  createMuiTheme,
+  ThemeProvider,
+  CssBaseline,
+  TextField,
+  Dialog,
+  DialogContent,
+  DialogContentText,
+  DialogActions,
+  IconButton } from '@material-ui/core';
+import { Delete } from '@material-ui/icons'
 //import './App.css';
 
-function ListItem(props) {
-  return (
-    <li>{props.value.date} {props.value.content} <form><button onClick={props.onClick}>Delete</button></form></li>
-  );
+const dark_theme = createMuiTheme({
+  palette: {
+    type: 'dark',
+    primary: {
+      dark: '#5a94af',
+      main: '#81d4fa',
+      light: '#9adcfb',
+    },
+    secondary: {
+      dark: '#aa647b',
+      main: '#f48fb1',
+      light: '#f6atc0',
+    }
+  },
+});
+
+class ListItem extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      isOpen: false,
+      date: props.value.date,
+      content: props.value.content,
+    };
+
+    this.onClick = props.onClick;
+  }
+
+  handleClose = () => {
+    this.setState({
+      isOpen: false,
+    });
+  }
+
+  handleClickOpen = () => {
+    this.setState({
+      isOpen: true,
+    });
+  }
+
+  render() {
+    return (
+      <li>
+        {this.state.date} {this.state.content}
+        <IconButton type="submit" onClick={this.handleClickOpen}>
+          <Delete />
+        </IconButton>
+        <Dialog
+          open={this.state.isOpen}
+          onClose={this.handleClose}
+          aria-labelledby="alert-dialog-title"
+          aria-describedby="alert-dialog-description"
+        >
+          <DialogContent>
+            <DialogContentText id="alert-dialog-description">
+              Are you sure you want to delete this note?
+            </DialogContentText>
+          </DialogContent>
+          <DialogActions>
+            <form>
+              <Button type="submit" onClick={this.onClick} variant="contained" color="secondary">
+                Yes
+            </Button>
+            </form>
+            <Button onClick={this.handleClose}>
+              No
+            </Button>
+          </DialogActions>
+        </Dialog>
+      </li>
+    );
+  }
 }
 
 class App extends React.Component {
@@ -44,7 +124,6 @@ class App extends React.Component {
   }
 
   deleteNote(_id) {
-
     fetch('http://localhost:3000/api/words/delete_note?_id=' + _id, {
       method: 'DELETE',
       mode: 'cors',
@@ -59,7 +138,9 @@ class App extends React.Component {
 
   render() {
     return (
-      <div>
+      <ThemeProvider theme={dark_theme}>
+        <CssBaseline />
+      <div style={{margin: '10px'}}>
         <div>
           <ul>
             {
@@ -72,20 +153,26 @@ class App extends React.Component {
 
         <div>
           <form onSubmit={this.addNote}>
-            <label>
-              Content:
-          <textarea value={this.state.textarea_value} onChange={this.handleChange} />
-            </label>
-            <button type="submit">Add</button>
+              <TextField
+                value={this.state.textarea_value}
+                onChange={this.handleChange}
+                id="standard-textarea"
+                label="Content"
+                placeholder=""
+                multiline
+                fullWidth
+              />
+            <Button type="submit" variant="contained" color="primary">Add</Button>
           </form>
         </div>
 
         <div>
           <form>
-            <button type="submit">Reload</button>
+            <Button variant="contained" type="submit" color="secondary">Reload</Button>
           </form>
         </div>
       </div>
+      </ThemeProvider>
     );
   }
 }

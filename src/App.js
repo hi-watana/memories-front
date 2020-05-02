@@ -5,12 +5,9 @@ import {
   ThemeProvider,
   CssBaseline,
   TextField,
-  Dialog,
-  DialogContent,
-  DialogContentText,
-  DialogActions,
-  IconButton } from '@material-ui/core';
-import { Delete } from '@material-ui/icons'
+} from '@material-ui/core';
+import ListItem from './components/ListItem'
+
 //import './App.css';
 
 const dark_theme = createMuiTheme({
@@ -29,63 +26,6 @@ const dark_theme = createMuiTheme({
   },
 });
 
-class ListItem extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      isOpen: false,
-      date: props.value.date,
-      content: props.value.content,
-    };
-
-    this.onClick = props.onClick;
-  }
-
-  handleClose = () => {
-    this.setState({
-      isOpen: false,
-    });
-  }
-
-  handleClickOpen = () => {
-    this.setState({
-      isOpen: true,
-    });
-  }
-
-  render() {
-    return (
-      <li>
-        {this.state.date} {this.state.content}
-        <IconButton type="submit" onClick={this.handleClickOpen}>
-          <Delete />
-        </IconButton>
-        <Dialog
-          open={this.state.isOpen}
-          onClose={this.handleClose}
-          aria-labelledby="alert-dialog-title"
-          aria-describedby="alert-dialog-description"
-        >
-          <DialogContent>
-            <DialogContentText id="alert-dialog-description">
-              Are you sure you want to delete this note?
-            </DialogContentText>
-          </DialogContent>
-          <DialogActions>
-            <form>
-              <Button type="submit" onClick={this.onClick} variant="contained" color="secondary">
-                Yes
-            </Button>
-            </form>
-            <Button onClick={this.handleClose}>
-              No
-            </Button>
-          </DialogActions>
-        </Dialog>
-      </li>
-    );
-  }
-}
 
 class App extends React.Component {
   constructor() {
@@ -94,12 +34,9 @@ class App extends React.Component {
       note_items: [],
       textarea_value: '',
     }
-
-    this.handleChange = this.handleChange.bind(this);
-    this.addNote = this.addNote.bind(this);
   }
 
-  componentDidMount() {
+  getNotes = () => {
     fetch('http://localhost:3000/api/words/get_notes?frame_size=50', {
       method: 'GET',
       mode: 'cors',
@@ -112,7 +49,11 @@ class App extends React.Component {
       .catch(console.log);
   }
 
-  addNote(event) {
+  componentDidMount() {
+    this.getNotes()
+  }
+
+  addNote = (cont) => {
     fetch('http://localhost:3000/api/words/add_note', {
       method: 'POST',
       mode: 'cors',
@@ -120,17 +61,23 @@ class App extends React.Component {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({content: this.state.textarea_value})
-    });
+    }).then(response => cont());
   }
 
-  deleteNote(_id) {
+  clearTextareaValue = () => {
+    this.setState({
+      textarea_value: ''
+    })
+  }
+
+  deleteNote = (_id, cont) => {
     fetch('http://localhost:3000/api/words/delete_note?_id=' + _id, {
       method: 'DELETE',
       mode: 'cors',
-    });
+    }).then(response => cont());
   }
 
-  handleChange(event) {
+  handleChange = (event) => {
     this.setState({
       textarea_value: event.target.value,
     });
@@ -145,31 +92,34 @@ class App extends React.Component {
           <ul>
             {
               this.state.note_items.map(note => (
-                <ListItem key={note._id} value={note} onClick={() => this.deleteNote(note._id)} />
+                <ListItem key={note._id} date={note.date} content={note.content} onClick={() => {
+                  this.deleteNote(note._id, this.getNotes)
+                }} />
               ))
             }
           </ul>
         </div>
 
         <div>
-          <form onSubmit={this.addNote}>
-              <TextField
-                value={this.state.textarea_value}
-                onChange={this.handleChange}
-                id="standard-textarea"
-                label="Content"
-                placeholder=""
-                multiline
-                fullWidth
-              />
-            <Button type="submit" variant="contained" color="primary">Add</Button>
-          </form>
+            <TextField
+              value={this.state.textarea_value}
+              onChange={this.handleChange}
+              id="standard-textarea"
+              label="Content"
+              placeholder=""
+              multiline
+              fullWidth
+            />
+          <Button onClick={() => {
+            this.addNote(() => {
+              this.getNotes()
+              this.clearTextareaValue()
+            })
+          }} variant="contained" color="primary">Add</Button>
         </div>
 
         <div>
-          <form>
-            <Button variant="contained" type="submit" color="secondary">Reload</Button>
-          </form>
+          <Button variant="contained" onClick={() => this.getNotes()} color="secondary">Reload</Button>
         </div>
       </div>
       </ThemeProvider>

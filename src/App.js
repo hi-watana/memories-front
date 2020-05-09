@@ -37,7 +37,7 @@ class App extends React.Component {
   }
 
   getNotes = () => {
-    fetch('http://localhost:3000/api/words/get_notes?frame_size=50', {
+    fetch('http://localhost:3030/api/words/get_notes?frame_size=50', {
       method: 'GET',
       mode: 'cors',
     }).then(res => res.json())
@@ -54,7 +54,7 @@ class App extends React.Component {
   }
 
   addNote = (cont) => {
-    fetch('http://localhost:3000/api/words/add_note', {
+    fetch('http://localhost:3030/api/words/add_note', {
       method: 'POST',
       mode: 'cors',
       headers: {
@@ -71,7 +71,7 @@ class App extends React.Component {
   }
 
   deleteNote = (_id, cont) => {
-    fetch('http://localhost:3000/api/words/delete_note?_id=' + _id, {
+    fetch('http://localhost:3030/api/words/delete_note?_id=' + _id, {
       method: 'DELETE',
       mode: 'cors',
     }).then(response => cont());

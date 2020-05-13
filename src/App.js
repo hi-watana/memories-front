@@ -1,12 +1,19 @@
 import React from 'react';
 import {
+  makeStyles,
   Button,
+  Fab,
+  List,
   createMuiTheme,
   ThemeProvider,
   CssBaseline,
   TextField,
+  Divider,
 } from '@material-ui/core';
-import ListItem from './components/ListItem'
+import AddIcon from '@material-ui/icons/Add'
+import NoteItem from './components/NoteItem'
+import TopAppBar from './components/TopAppBar'
+import 'typeface-roboto'
 
 //import './App.css';
 
@@ -26,105 +33,104 @@ const dark_theme = createMuiTheme({
   },
 });
 
+const light_theme = createMuiTheme()
 
-class App extends React.Component {
-  constructor() {
-    super();
-    this.state = {
-      note_items: [],
-      textarea_value: '',
-    }
-  }
+const useStyles = makeStyles((theme) => ({
+  fab: {
+    position: 'absolute',
+    bottom: theme.spacing(2),
+    right: theme.spacing(2),
+  },
+}))
 
-  getNotes = () => {
+const App = () => {
+  const [noteItems, setNoteItems] = React.useState([])
+  const [textAreaValue, setTextAreaValue] = React.useState('')
+
+  const getNotes = () => {
     fetch('http://localhost:3030/api/words/get_notes?frame_size=50', {
       method: 'GET',
       mode: 'cors',
     }).then(res => res.json())
       .then(res => {
-        this.setState({
-          note_items: res,
-        })
+        setNoteItems(res)
       })
       .catch(console.log);
   }
 
-  componentDidMount() {
-    this.getNotes()
-  }
+  React.useEffect(() => {
+    getNotes()
+  }, [])
 
-  addNote = (cont) => {
+  const addNote = (cont) => {
     fetch('http://localhost:3030/api/words/add_note', {
       method: 'POST',
       mode: 'cors',
       headers: {
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({content: this.state.textarea_value})
+      body: JSON.stringify({ content: textAreaValue })
     }).then(response => cont());
   }
 
-  clearTextareaValue = () => {
-    this.setState({
-      textarea_value: ''
-    })
+  const clearTextareaValue = () => {
+    setTextAreaValue('')
   }
 
-  deleteNote = (_id, cont) => {
+  const deleteNote = (_id, cont) => {
     fetch('http://localhost:3030/api/words/delete_note?_id=' + _id, {
       method: 'DELETE',
       mode: 'cors',
     }).then(response => cont());
   }
 
-  handleChange = (event) => {
-    this.setState({
-      textarea_value: event.target.value,
-    });
+  const handleChange = (event) => {
+    setTextAreaValue(event.target.value)
   }
 
-  render() {
-    return (
-      <ThemeProvider theme={dark_theme}>
-        <CssBaseline />
-      <div style={{margin: '10px'}}>
-        <div>
-          <ul>
-            {
-              this.state.note_items.map(note => (
-                <ListItem key={note._id} date={note.date} content={note.content} onClick={() => {
-                  this.deleteNote(note._id, this.getNotes)
+  return (
+    <ThemeProvider theme={
+      window.matchMedia("(prefers-color-scheme: dark)").matches ? dark_theme : light_theme
+    }
+    >
+      <CssBaseline />
+      <TopAppBar />
+      <div style={{ margin: '10px' }}>
+        <List>
+          {
+            noteItems.map((note, index) => (
+              <React.Fragment>
+                {index > 0 && <Divider />}
+                <NoteItem key={note._id} date={note.date} content={note.content} onClick={() => {
+                  deleteNote(note._id, getNotes)
                 }} />
-              ))
-            }
-          </ul>
-        </div>
+              </React.Fragment>
+            ))
+          }
+        </List>
 
-        <div>
-            <TextField
-              value={this.state.textarea_value}
-              onChange={this.handleChange}
-              id="standard-textarea"
-              label="Content"
-              placeholder=""
-              multiline
-              fullWidth
-            />
-          <Button onClick={() => {
-            this.addNote(() => {
-              this.getNotes()
-              this.clearTextareaValue()
-            })
-          }} variant="contained" color="primary">Add</Button>
-        </div>
-
-        <div>
-          <Button variant="contained" onClick={() => this.getNotes()} color="secondary">Reload</Button>
-        </div>
+        <TextField
+          value={textAreaValue}
+          onChange={handleChange}
+          id="standard-textarea"
+          label="Content"
+          placeholder=""
+          multiline
+          fullWidth
+        />
+        <Button onClick={() => {
+          addNote(() => {
+            getNotes()
+            clearTextareaValue()
+          })
+        }} variant="contained" color="primary">Add</Button>
+        <Button variant="contained" onClick={() => getNotes()} color="secondary">Reload</Button>
+        <Fab aria-label={'Add'} color={'primary'} button>
+          <AddIcon />
+        </Fab>
       </div>
-      </ThemeProvider>
-    );
-  }
+    </ThemeProvider>
+  );
 }
 
 export default App;

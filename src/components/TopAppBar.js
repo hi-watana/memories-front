@@ -54,7 +54,7 @@ export default function TopAppBar(props) {
     <React.Fragment>
       <CssBaseline />
       <HideOnScroll {...props}>
-        <AppBar color="inherit">
+        <AppBar elevation={4} color="inherit">
           <Toolbar>
             {/*
             <IconButton edge="start" className={classes.menuButton} color="inherit" aria-label="menu">

@@ -1,18 +1,18 @@
 import React from 'react';
 import {
   makeStyles,
-  Button,
   Fab,
   List,
   createMuiTheme,
   ThemeProvider,
   CssBaseline,
-  TextField,
+  Fade,
   Divider,
 } from '@material-ui/core';
 import AddIcon from '@material-ui/icons/Add'
 import NoteItem from './components/NoteItem'
 import TopAppBar from './components/TopAppBar'
+import NoteCreator from './components/NoteCreator'
 import 'typeface-roboto'
 
 //import './App.css';
@@ -37,18 +37,19 @@ const light_theme = createMuiTheme()
 
 const useStyles = makeStyles((theme) => ({
   fab: {
-    position: 'absolute',
+    position: 'fixed',
     bottom: theme.spacing(2),
     right: theme.spacing(2),
   },
 }))
 
 const App = () => {
+  const classes = useStyles()
   const [noteItems, setNoteItems] = React.useState([])
-  const [textAreaValue, setTextAreaValue] = React.useState('')
+  const [noteCreatorOpen, setNoteCreatorOpen] = React.useState(false)
 
   const getNotes = () => {
-    fetch('http://localhost:3030/api/words/get_notes?frame_size=50', {
+    fetch('http://localhost:3030/notes/?frame_size=50', {
       method: 'GET',
       mode: 'cors',
     }).then(res => res.json())
@@ -62,30 +63,11 @@ const App = () => {
     getNotes()
   }, [])
 
-  const addNote = (cont) => {
-    fetch('http://localhost:3030/api/words/add_note', {
-      method: 'POST',
-      mode: 'cors',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ content: textAreaValue })
-    }).then(response => cont());
-  }
-
-  const clearTextareaValue = () => {
-    setTextAreaValue('')
-  }
-
   const deleteNote = (_id, cont) => {
-    fetch('http://localhost:3030/api/words/delete_note?_id=' + _id, {
+    fetch(`http://localhost:3030/notes/${_id}`, {
       method: 'DELETE',
       mode: 'cors',
     }).then(response => cont());
-  }
-
-  const handleChange = (event) => {
-    setTextAreaValue(event.target.value)
   }
 
   return (
@@ -99,35 +81,30 @@ const App = () => {
         <List>
           {
             noteItems.map((note, index) => (
-              <React.Fragment>
+              <React.Fragment key={note._id}>
                 {index > 0 && <Divider />}
-                <NoteItem key={note._id} date={note.date} content={note.content} onClick={() => {
+                <NoteItem date={note.date} content={note.content} onClick={() => {
                   deleteNote(note._id, getNotes)
                 }} />
               </React.Fragment>
             ))
           }
         </List>
-
-        <TextField
-          value={textAreaValue}
-          onChange={handleChange}
-          id="standard-textarea"
-          label="Content"
-          placeholder=""
-          multiline
-          fullWidth
+        <Fade in={!noteCreatorOpen}>
+          <Fab
+            aria-label={'Add'}
+            color={'primary'}
+            className={classes.fab}
+            onClick={() => setNoteCreatorOpen(true)}
+          >
+            <AddIcon />
+          </Fab>
+        </Fade>
+        <NoteCreator
+          getNotes={getNotes}
+          onClose={() => setNoteCreatorOpen(false)}
+          open={noteCreatorOpen}
         />
-        <Button onClick={() => {
-          addNote(() => {
-            getNotes()
-            clearTextareaValue()
-          })
-        }} variant="contained" color="primary">Add</Button>
-        <Button variant="contained" onClick={() => getNotes()} color="secondary">Reload</Button>
-        <Fab aria-label={'Add'} color={'primary'} button>
-          <AddIcon />
-        </Fab>
       </div>
     </ThemeProvider>
   );

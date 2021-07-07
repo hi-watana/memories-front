@@ -49,7 +49,7 @@ const App = () => {
   const [noteCreatorOpen, setNoteCreatorOpen] = React.useState(false)
 
   const getNotes = () => {
-    fetch('http://localhost:3030/notes/?frame_size=50', {
+    fetch(`${process.env.REACT_APP_API_URI}/notes/?frame_size=50`, {
       method: 'GET',
       mode: 'cors',
     }).then(res => res.json())
@@ -64,7 +64,7 @@ const App = () => {
   }, [])
 
   const deleteNote = (_id, cont) => {
-    fetch(`http://localhost:3030/notes/${_id}`, {
+    fetch(`${process.env.REACT_APP_API_URI}/notes/${_id}`, {
       method: 'DELETE',
       mode: 'cors',
     }).then(response => cont());

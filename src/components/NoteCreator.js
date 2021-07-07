@@ -42,7 +42,7 @@ const NoteCreator = (props) => {
   }
 
   const addNote = (cont) => {
-    fetch('http://localhost:3030/notes', {
+    fetch(`${process.env.REACT_APP_API_URI}/notes`, {
       method: 'POST',
       mode: 'cors',
       headers: {

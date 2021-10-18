@@ -32,6 +32,7 @@ const useStyles = makeStyles((theme) => ({
 const NoteCreator = (props) => {
   const classes = useStyles()
   const [textAreaValue, setTextAreaValue] = React.useState('')
+  const buttonProcessing = React.useRef(false)
 
   const handleChange = (event) => {
     setTextAreaValue(event.target.value)
@@ -72,10 +73,13 @@ const NoteCreator = (props) => {
           />
           <div className={classes.buttons}>
             <Button onClick={() => {
+              if (buttonProcessing.current) return
+              buttonProcessing.current = true
               addNote(() => {
                 props.getNotes()
                 clearTextareaValue()
                 props.onClose()
+                buttonProcessing.current = false
               })
             }} color="primary">Add</Button>
             <Button onClick={props.onClose}>Cancel</Button>

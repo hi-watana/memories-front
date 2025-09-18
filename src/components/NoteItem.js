@@ -1,4 +1,4 @@
-import React from 'react'
+import React from 'react';
 import {
   Button,
   Dialog,
@@ -10,15 +10,14 @@ import {
   ListItemText,
   ListItemIcon,
   Typography,
-} from '@material-ui/core'
-import { Delete } from '@material-ui/icons'
-import 'typeface-roboto'
+} from '@mui/material';
+import { Delete } from '@mui/icons-material';
 
 const NoteItem = (props) => {
-  const [isOpen, setIsOpen] = React.useState(false)
+  const [isOpen, setIsOpen] = React.useState(false);
 
-  const handleClose = () => setIsOpen(false)
-  const handleClickOpen = () => setIsOpen(true)
+  const handleClose = () => setIsOpen(false);
+  const handleClickOpen = () => setIsOpen(true);
 
   return (
     <ListItem>
@@ -56,7 +55,7 @@ const NoteItem = (props) => {
         </DialogActions>
       </Dialog>
     </ListItem>
-  )
-}
+  );
+};
 
-export default NoteItem
+export default NoteItem;

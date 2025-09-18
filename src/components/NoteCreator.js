@@ -1,14 +1,14 @@
-import React from 'react'
+import React from 'react';
 import {
-  makeStyles,
   Button,
   Divider,
   Paper,
   Slide,
   TextField,
   Typography,
-} from '@material-ui/core'
-import 'typeface-roboto'
+} from '@mui/material';
+import { makeStyles } from '@mui/styles';
+import { StyledEngineProvider } from '@mui/material/styles';
 
 const useStyles = makeStyles((theme) => ({
   contents: {
@@ -27,67 +27,75 @@ const useStyles = makeStyles((theme) => ({
     bottom: theme.spacing(4),
     right: theme.spacing(1),
   },
-}))
+}));
 
 const NoteCreator = (props) => {
-  const classes = useStyles()
-  const [textAreaValue, setTextAreaValue] = React.useState('')
-  const buttonProcessing = React.useRef(false)
+  const classes = useStyles();
+  const [textAreaValue, setTextAreaValue] = React.useState('');
+  const buttonProcessing = React.useRef(false);
 
   const handleChange = (event) => {
-    setTextAreaValue(event.target.value)
-  }
+    setTextAreaValue(event.target.value);
+  };
 
   const clearTextareaValue = () => {
-    setTextAreaValue('')
-  }
+    setTextAreaValue('');
+  };
 
   const addNote = (cont) => {
     fetch(`${process.env.REACT_APP_API_URI}/notes`, {
       method: 'POST',
       mode: 'cors',
       headers: {
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ content: textAreaValue })
-    }).then(response => cont());
-  }
+      body: JSON.stringify({ content: textAreaValue }),
+    }).then((response) => cont());
+  };
 
   return (
-    <Slide in={props.open} direction="up" mountOnEnter unmountOnExit>
-      <Paper className={classes.bottomSheet}>
-        <div className={classes.contents}>
-          <Typography align="center" variant="subtitle1">
-            Add a memory
-          </Typography>
-          <Divider />
-          <TextField
-            value={textAreaValue}
-            onChange={handleChange}
-            id="standard-textarea"
-            label="Content"
-            placeholder=""
-            multiline
-            rows={12}
-            fullWidth
-          />
-          <div className={classes.buttons}>
-            <Button onClick={() => {
-              if (buttonProcessing.current) return
-              buttonProcessing.current = true
-              addNote(() => {
-                props.getNotes()
-                clearTextareaValue()
-                props.onClose()
-                buttonProcessing.current = false
-              })
-            }} color="primary">Add</Button>
-            <Button onClick={props.onClose}>Cancel</Button>
+    <StyledEngineProvider injectFirst>
+      <Slide in={props.open} direction="up" mountOnEnter unmountOnExit>
+        <Paper className={classes.bottomSheet}>
+          <div className={classes.contents}>
+            <Typography align="center" variant="subtitle1">
+              Add a memory
+            </Typography>
+            <Divider />
+            <TextField
+              value={textAreaValue}
+              onChange={handleChange}
+              id="standard-textarea"
+              label="Content"
+              placeholder=""
+              multiline
+              rows={12}
+              fullWidth
+              variant="standard"
+            />
+            <div className={classes.buttons}>
+              <Button
+                onClick={() => {
+                  if (buttonProcessing.current) return;
+                  buttonProcessing.current = true;
+                  addNote(() => {
+                    props.getNotes();
+                    clearTextareaValue();
+                    props.onClose();
+                    buttonProcessing.current = false;
+                  });
+                }}
+                color="primary"
+              >
+                Add
+              </Button>
+              <Button onClick={props.onClose}>Cancel</Button>
+            </div>
           </div>
-        </div>
-      </Paper>
-    </Slide>
-  )
-}
+        </Paper>
+      </Slide>
+    </StyledEngineProvider>
+  );
+};
 
-export default NoteCreator
+export default NoteCreator;
